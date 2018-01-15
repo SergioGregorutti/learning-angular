@@ -1,30 +1,47 @@
 import { NgModule } from '@angular/core';
-import { ProductsListComponent } from './products-list.component';
+import { RouterModule} from '@angular/router';
+import { ReactiveFormsModule } from '@angular/forms';
+
+// Imports for loading & configuring the in-memory web api
+import { InMemoryWebApiModule } from 'angular-in-memory-web-api';
+import { ProductData } from './product-data';
+
+import { ProductListComponent } from './product-list.component';
 import { ProductDetailComponent } from './product-detail.component';
-import { ConvertToSpacesPipe } from '../shared/convert-to-spaces.pipe';
-import { RouterModule } from '@angular/router';
-import { ProductGuardService } from './product-guard.service';
+import { ProductDetailGuard, ProductEditGuard } from './product-guard.service';
+import { ProductEditComponent } from './product-edit.component';
+
+import { ProductFilterPipe } from './product-filter.pipe';
 import { ProductService } from './product.service';
+
 import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
   imports: [
+    SharedModule,
+    ReactiveFormsModule,
+    InMemoryWebApiModule.forRoot(ProductData),
     RouterModule.forChild([
-      { path: 'products', component: ProductsListComponent },
-      { path: 'products/:id',
-        canActivate: [ ProductGuardService ],
-        component: ProductDetailComponent }
-    ]),
-    SharedModule
+      { path: 'products', component: ProductListComponent },
+      { path: 'product/:id',
+        canActivate: [ ProductDetailGuard],
+        component: ProductDetailComponent
+      },
+      { path: 'productEdit/:id',
+        canDeactivate: [ ProductEditGuard ],
+        component: ProductEditComponent },
+    ])
   ],
   declarations: [
-    ProductsListComponent,
+    ProductListComponent,
     ProductDetailComponent,
-    ConvertToSpacesPipe
+    ProductEditComponent,
+    ProductFilterPipe
   ],
   providers: [
     ProductService,
-    ProductGuardService
+    ProductDetailGuard,
+    ProductEditGuard
   ]
 })
-export class ProductModule { }
+export class ProductModule {}
